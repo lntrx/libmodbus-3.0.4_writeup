@@ -5,18 +5,20 @@ ABD'de master okuyan yabancı bir arkadaşım yardım etmem için ve aynı zaman
 Assignment:
 
 
-Libmodbus v3.0.4 overflow açığı barındırmaktadır. Açık modbus.c dosyasında modbus_reply fonksiyonunda ortaya çıkıyor. Bir sanal makinede bu versiyon derlendi ve kuruldu. Bu kütüphane ile beraber gelen test programları var: unit-test-server ve unit-test-client. unit-test-server kaynak kodlarına gizli bir fonksiyon yerleştirildi. Açığı kullarak bu fonksiyona atlamak.
+Libmodbus v3.0.4 overflow açığı barındırmaktadır. Açık modbus.c dosyasında modbus_reply fonksiyonunda ortaya çıkıyor. Bir sanal makinede bu versiyon derlendi ve kuruldu. Bu kütüphane ile beraber gelen test programları var: unit-test-server ve unit-test-client. unit-test-server kaynak kodlarına gizli bir fonksiyon yerleştirildi. Açığı kullarak bu fonksiyona atlamak gerekir.
 
 
 Libmodbus açık kaynak kodlu bir kütüphane. Modbus protokolüne uygun bir şekilde data alıp gönderir. Detaylı bilgi için: [libmodbus](https://libmodbus.org/documentation/)
 
-Bive verilen sanal makineyi indirip virtualBox veya vmware ile açalım:
+Bize verilen sanal makineyi indirip VirtualBox veya VMware ile açalım:
 
 link: [Virtual Machine](https://drive.google.com/open?id=1NNNN2OEsz05R_c4WjcMIor-vIqeUhJo1)
 
+```
 user: ubuntu
 pass: 123456
 directory: ~/Desktop/modbus/tests/.libs
+```
 
 ![Screenshot](./screenshots/1.png)
 
@@ -25,7 +27,7 @@ Resimde de görüldüğü gibi ~/Desktop/modbus/tests/unit-test-server.c dosyas�
 Açığa bi göz atalım. Bunun için Google'dan araştırma yapılabilir, fakat biz gezdirelim:
 
  
-~~/Desktop/modbus/src/modbus.c dosyasına bakarken şu part gözümüze çarpması lazım:
+~/Desktop/modbus/src/modbus.c dosyasına bakarken şu part gözümüze çarpması lazım:
 
 ```c
 
@@ -180,7 +182,7 @@ Kod parçasında görüldüğü gibi 1. kısımda görüldüğü gibi kontrolüm
 
 örnek olarak *mb_mapping->tab_registers[0]* kısmına yazalım:
 
-*req*, "AAAAAAAAAAAAAAAAA" olsun ve *offset* ise 0 olsun bu durumda ilk olarak *req[offset + j]* değeri alınacak 0x41 shit operationundan sonra 0x4100 olur. *req[offset + j + 1]* değerini de eklersek 0x4141 olur ve bu haritanın ilk elemanında yüklenir. Okuma kısmında ise *mb_mapping->tab_registers[i] >> 8*,  0x4141 değeri 0x41 olur. İkinci kısımda ise *mb_mapping->tab_registers[i] & 0xFF*, and operationdan sonra 0x4141 değeri 0x41 olur. Yani her iki durum bize sıkıntı çıkarmaz. 
+*req*, "AAAAAAAAAAAAAAAAA" olsun ve *offset* ise 0 olsun bu durumda ilk olarak *req[offset + j]* değeri alınacak 0x41 shift operationundan sonra 0x4100 olur. *req[offset + j + 1]* değerini de eklersek 0x4141 olur ve bu haritanın ilk elemanında yüklenir. Okuma kısmında ise *mb_mapping->tab_registers[i] >> 8*,  0x4141 değeri 0x41 olur. İkinci kısımda ise *mb_mapping->tab_registers[i] & 0xFF*, and operationdan sonra 0x4141 değeri 0x41 olur. Yani her iki durum bize sıkıntı çıkarmaz. 
 
 Bu kod parçasında göze çarpan şey ise 2 byte bir yere yazılıyor. 260 byte yazdırmak için bizim 520 byte vermemiz lazım. Bu şekilde paylodumuz başarılı bir şekilde yüklenmiş olacak.
 
@@ -335,7 +337,7 @@ NOT: C'ye bir padding eklemeliyiz. Sırasıyla 6, 7 ve 8 olacak paddingler
 
 ![Screenshot](./screenshots/9.png)
 
-Bu şekilde çalıştırdığımızda *send_msg* fonksiyonunda hata aldık. Bu fonksiyon *modbus_reply* fonksiyonunun sonunda geçiyor. Demek ki stack yerle bir olduğu için EAX'a atması gereken değer yerine 0x43434343 değerini stackten almış. Haliyle EAX+0x20'de ki değere erişemiyor. Bu fonksiyona atlamadan önce EAX'a attığı değere bakalım:
+Bu şekilde çalıştırdığımızda *send_msg* fonksiyonunda hata aldık. Bu fonksiyon *modbus_reply* fonksiyonunun sonunda geçiyor. Demek ki stack yerle bir olduğu için EAX'a atması gereken değer yerine 0x43434343 değerini stackten almış. Haliyle EAX+0x20 adresinin içinde ki değere erişemiyor. Bu fonksiyona atlamadan önce EAX'a attığı değere bakalım:
 
 ![Screenshot](./screenshots/10.png)
 
