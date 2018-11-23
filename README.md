@@ -380,7 +380,7 @@ packet3 = "\x43"*16 + "\xef\xbe\xad\xde" + "\x08\xc0\x04\x08" + "\x43" * (66*2 -
 
 ![Screenshot](./screenshots/17.png)
 
-Ve işte sihirli cümle karşımızda: "Invalid $PC address: 0xdeadbeff"
+Ve işte sihirli cümle karşımızda: "Invalid $PC address: 0xdeadbeef"
 
 Tek yapmamız gereken fotoda bulduğumuz secret_function adresi girmek. Yerleştirip çalıştıralım:
 
